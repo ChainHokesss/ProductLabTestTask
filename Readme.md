@@ -12,6 +12,6 @@
     3. запустить приложение aiohttp python run.py
 
 
-вид xlsx файла 
+вид xlsx файла
 
-![img.png](img.png)
+![img.png](./images/img.png)
