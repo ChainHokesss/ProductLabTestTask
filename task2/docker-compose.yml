@@ -1,0 +1,51 @@
+version: "3.10"
+
+services:
+  web:
+    build: apiservice
+    command:  bash -c "./manage.py migrate && ./manage.py collectstatic --noinput &&while :; do exec ./manage.py runserver 0.0.0.0:8000; done;"
+    volumes:
+      - ./apiservice:/apiservice
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=$SECRET_KEY
+
+      - POSTGRES_NAME=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_PORT=$POSTGRES_PORT
+      - POSTGRES_HOST=$POSTGRES_HOST
+
+      - AIOHTTP_HOST=$AIOHTTP_HOST
+      - AIOHTTP_PORT=$AIOHTTP_PORT
+    depends_on:
+      - aiohttp
+      - db
+    env_file:
+      - ./.env
+
+  aiohttp:
+     build: asyncservice
+     command: python run.py
+     volumes:
+       - ./asyncservice:/asyncservice
+     ports:
+       - "8080:8080"
+     environment:
+       - AIOHTTP_HOST=$AIOHTTP_HOST
+       - AIOHTTP_PORT=$AIOHTTP_PORT
+     env_file:
+       - ./.env
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_PORT=$POSTGRES_PORT
+    env_file:
+      - ./.env
